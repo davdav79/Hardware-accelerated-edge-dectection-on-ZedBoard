@@ -1,15 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import cv2 as cv
 
 # load bmp image
-img = plt.imread("sample_images/Lena.bmp")
+raw_img = plt.imread("sample_images/Lena.bmp")
 #img = plt.imread("sample_images/Picture_Example3_noise_10_pixelCnt_64_featureCnt_7.png")
 
 # convert to grayscale
-img = img.mean(axis=2)
+raw_img = raw_img.mean(axis=2)
 
 # convert to numpy array
-img = np.array(img)
+img = np.array(raw_img)
 
 
 # define filters
@@ -41,6 +42,7 @@ def convolution(img, conv_filter):
     # return output
     return output
 
+
 # apply convolution
 output = convolution(img, edge_filter)
 
@@ -54,7 +56,6 @@ output_sobel = np.sqrt(output_sobel_x**2 + output_sobel_y**2)
 
 # calculate orientation of the edge
 output_sobel_orientation = np.arctan2(output_sobel_y, output_sobel_x)
-
 
 # show image and output and difference image
 plt.subplot(2, 4, 1)
