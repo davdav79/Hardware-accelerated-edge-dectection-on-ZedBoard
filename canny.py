@@ -1,0 +1,1 @@
+# TODO: implement canny edge detection and convert the result to a binary image
