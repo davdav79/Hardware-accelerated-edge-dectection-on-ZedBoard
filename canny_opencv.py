@@ -95,8 +95,6 @@ def canny_edge_detection(img, sigma=1, kernel_size=5, low_threshold=0, high_thre
 #img = cv2.imread('sample_images/Lena.bmp')
 img = cv2.imread('sample_images/Picture_Crossing_noise_0_pixelCnt_128_featureCnt_5.bmp')
 
-# 
-
 
 # make opencv window with sliders for low_threshold, high_threshold and sigma
 def nothing(x):
