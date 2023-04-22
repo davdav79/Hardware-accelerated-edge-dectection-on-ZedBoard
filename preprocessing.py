@@ -68,26 +68,26 @@ def frame_extrapolate(img, thickness=1):
 
     # extrapolate top frame by adding gradient continuously
     for i in range(thickness):
-        frame[thickness-i-1, thickness:-thickness] = frame[thickness-i, thickness:-thickness] + gradient_top
+        frame[thickness-i-1, thickness:-thickness] = frame[thickness-i, thickness:-thickness] - gradient_top
 
     # extrapolate left frame
     for i in range(thickness):
-        frame[thickness:-thickness, thickness-i-1] = frame[thickness:-thickness, thickness-i] + gradient_left
+        frame[thickness:-thickness, thickness-i-1] = frame[thickness:-thickness, thickness-i] - gradient_left
 
     # extrapolate bottom frame
     for i in range(thickness):
-        frame[-thickness + i, thickness:-thickness] = frame[-thickness + i - 1, thickness:-thickness] + gradient_bottom
+        frame[-thickness + i, thickness:-thickness] = frame[-thickness + i - 1, thickness:-thickness] - gradient_bottom
 
     # extrapolate right frame
     for i in range(thickness):
-        frame[thickness:-thickness, -thickness + i ] = frame[thickness:-thickness, -thickness + i - 1] + gradient_right
+        frame[thickness:-thickness, -thickness + i ] = frame[thickness:-thickness, -thickness + i - 1] - gradient_right
 
     # extrapolate corners by extrapolating diagonally
     for i in range(thickness):
-        frame[thickness-i-1, thickness-i-1] = frame[thickness-i, thickness-i] + gradient_top_left
-        frame[thickness-i-1, -thickness+i] = frame[thickness-i, -thickness+i-1] + gradient_top_right
-        frame[-thickness+i, thickness-i-1] = frame[-thickness+i-1, thickness-i] + gradient_bottom_left
-        frame[-thickness+i, -thickness+i] = frame[-thickness+i-1, -thickness+i-1] + gradient_bottom_right
+        frame[thickness-i-1, thickness-i-1] = frame[thickness-i, thickness-i] - gradient_top_left
+        frame[thickness-i-1, -thickness+i] = frame[thickness-i, -thickness+i-1] - gradient_top_right
+        frame[-thickness+i, thickness-i-1] = frame[-thickness+i-1, thickness-i] - gradient_bottom_left
+        frame[-thickness+i, -thickness+i] = frame[-thickness+i-1, -thickness+i-1] - gradient_bottom_right
 
     # cut negative values
     frame[frame < 0] = 0
@@ -106,38 +106,50 @@ def frame_extrapolate(img, thickness=1):
     gradient_bottom_right_right = []
 
     for i in range(thickness-1):
-        gradient_top_left_left.append(frame[i,i]-frame[i,thickness])
-        gradient_top_left_right.append(frame[i,i]-frame[thickness,i])
         gradient_top_right_left.append(frame[i,-i-1]-frame[i,-thickness-1])
-        gradient_top_right_right.append(frame[i,-i-1]-frame[thickness,-i])
-        gradient_bottom_left_left.append(frame[-i-1,i]-frame[-thickness-1,-i])
-        gradient_bottom_left_right.append(frame[-i-1,i]-frame[-i,-thickness-1])
-        gradient_bottom_right_left.append(frame[-i-1,-i-1]-frame[-thickness-1,-i])
-        gradient_bottom_right_right.append(frame[-i-1,-i-1]-frame[-i,-thickness-1])
+        gradient_top_right_right.append(frame[i,-i-1]-frame[thickness,-i-1])
+        
+        gradient_top_left_left.append(frame[i,i]-frame[thickness,i])
+        gradient_top_left_right.append(frame[i,i]-frame[i,thickness])
+
+        gradient_bottom_right_left.append(frame[-i-1,-i-1]-frame[-i-1,-thickness-1])
+        gradient_bottom_right_right.append(frame[-i-1,-i-1]-frame[-thickness-1,-i-1])
+
+        gradient_bottom_left_left.append(frame[-i-1,i]-frame[-thickness-1,i])
+        gradient_bottom_left_right.append(frame[-i-1,i]-frame[-i-1,thickness])
     
-    print(gradient_top_right_left)
 
     # fill missing corner values by interpolating between diagonal and values of last line/column
     for i in range (thickness-1):
         # generate interpolation values
-        interpolation_top_left_left = np.linspace(1, 0, thickness-i+1) * gradient_top_left_left[i] + frame[i,i]
-        interpolation_top_left_right = np.linspace(0, 1, thickness-i+1) * gradient_top_left_right[i] + frame[i,i]
-        interpolation_top_right_left = np.linspace(0, 1, thickness-i) * gradient_top_right_left[i] + frame[i,-i]
-        interpolation_top_right_right = np.linspace(0, 1, thickness-i+1) * gradient_top_right_right[i] + frame[i,-i]
-        interpolation_bottom_left_left = np.linspace(0, 1, thickness-i+1) * gradient_bottom_left_left[i] + frame[-i-1,i]
-        interpolation_bottom_left_right = np.linspace(0, 1, thickness-i+1) * gradient_bottom_left_right[i] + frame[-i-1,i]
-        interpolation_bottom_right_left = np.linspace(0, 1, thickness-i+1) * gradient_bottom_right_left[i] + frame[-i-1,-i-1]
-        interpolation_bottom_right_right = np.linspace(0, 1, thickness-i+1) * gradient_bottom_right_right[i] + frame[-i-1,-i-1]
+        
+        interpolation_top_right_left = np.linspace(0, 1, thickness-i+1) * gradient_top_right_left[i] + frame[i, -thickness-1]
+        interpolation_top_right_right = np.linspace(0, 1, thickness-i+1) * gradient_top_right_right[i] + frame[thickness, -i-1]
+        
+        interpolation_top_left_left = np.linspace(0, 1, thickness-i+1) * gradient_top_left_left[i] + frame[thickness, i]
+        interpolation_top_left_right = np.linspace(0, 1, thickness-i+1) * gradient_top_left_right[i] + frame[i, thickness]
+
+        interpolation_bottom_right_left = np.linspace(0, 1, thickness-i+1) * gradient_bottom_right_left[i] + frame[-i-1,-thickness-1]
+        interpolation_bottom_right_right = np.linspace(0, 1, thickness-i+1) * gradient_bottom_right_right[i] + frame[-thickness-1,-i-1]
+
+        interpolation_bottom_left_left = np.linspace(0, 1, thickness-i+1) * gradient_bottom_left_left[i] + frame[-thickness-1,i]
+        interpolation_bottom_left_right = np.linspace(0, 1, thickness-i+1) * gradient_bottom_left_right[i] + frame[-i-1,thickness]
 
         # fill missing values
-        frame[i+1:thickness, i] = interpolation_top_left_left[1:-1]
-        frame[i, i+1:thickness] = interpolation_top_left_right[1:-1]
+        frame[i, -thickness:-i-1] = interpolation_top_right_left[1:-1]
         frame[i+1:thickness, -i-1] = interpolation_top_right_right[1:-1]
-        frame[i, -thickness+1:-i-1] = interpolation_top_right_left[1:-1]
-        frame[-thickness:-i-1, i] = interpolation_bottom_left_left[1:-1]
-        frame[-i-1, i+1:thickness] = interpolation_bottom_left_right[1:-1]
-        frame[-thickness:-i-1, -i-1] = interpolation_bottom_right_left[1:-1]
-        frame[-i-1, -thickness:-i-1] = interpolation_bottom_right_right[1:-1]
+        
+        frame[i, i+1:thickness] = interpolation_top_left_left[1:-1]
+        frame[i+1:thickness, i] = interpolation_top_left_right[1:-1]
+
+        frame[-i-1, -thickness:-i-1] = interpolation_bottom_right_left[1:-1]
+        frame[-thickness:-i-1, -i-1] = interpolation_bottom_right_right[1:-1]
+
+        frame[-i-1, i+1:thickness] = interpolation_bottom_left_left[1:-1]
+        frame[-thickness:-i-1, i] = interpolation_bottom_left_right[1:-1]
+        
+
+
 
     # cut negative values
     frame[frame < 0] = 0
