@@ -30,7 +30,7 @@ def frame_random(img, thickness=1):
     # return frame
     return frame
 
-# define function for adding frame by extrapolating values by adding gradient of adjacent pixel #TODO: fix this
+# define function for adding frame by extrapolating values by adding gradient of adjacent pixel
 def frame_extrapolate(img, thickness=1):
     # get image shape
     img_shape = img.shape
@@ -226,3 +226,31 @@ def gaussian_blur(img, kernel_size=3, sigma=1):
 
     # return blurred image
     return img_blur
+
+
+def preprocessing(img, sigma, kernel_size_blur, preprocessing_algorithm, kernel_size):
+    # apply gaussian blur
+    print("sigma: ", sigma)
+    print("kernel_size_blur: ", kernel_size_blur)
+    print("preprocessing_algorithm: ", preprocessing_algorithm)
+    print("kernel_size: ", kernel_size)
+    
+    # apply preprocessing algorithm
+    if preprocessing_algorithm == 0:
+        return img
+    elif preprocessing_algorithm == 1:
+        img = frame_absolute(img=img, thickness=int((kernel_size-1)/2))
+    elif preprocessing_algorithm == 2:
+        img = frame_mirror(img, thickness=int((kernel_size-1)/2))
+    elif preprocessing_algorithm == 3:
+        img = frame_mirror_opposite(img, thickness=int((kernel_size-1)/2))
+    elif preprocessing_algorithm == 4:
+        img = frame_extrapolate(img, thickness=int((kernel_size-1)/2))
+    elif preprocessing_algorithm == 5:
+        img = frame_random(img, thickness=int((kernel_size-1)/2))
+
+    if sigma != 0:
+        img = gaussian_blur(img, kernel_size_blur, sigma)
+
+    # return preprocessed image
+    return img
