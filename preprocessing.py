@@ -229,16 +229,8 @@ def gaussian_blur(img, kernel_size=3, sigma=1):
 
 
 def preprocessing(img, sigma, kernel_size_blur, preprocessing_algorithm, kernel_size):
-    # apply gaussian blur
-    print("sigma: ", sigma)
-    print("kernel_size_blur: ", kernel_size_blur)
-    print("preprocessing_algorithm: ", preprocessing_algorithm)
-    print("kernel_size: ", kernel_size)
-    
     # apply preprocessing algorithm
-    if preprocessing_algorithm == 0:
-        return img
-    elif preprocessing_algorithm == 1:
+    if preprocessing_algorithm == 1:
         img = frame_absolute(img=img, thickness=int((kernel_size-1)/2))
     elif preprocessing_algorithm == 2:
         img = frame_mirror(img, thickness=int((kernel_size-1)/2))
@@ -249,8 +241,15 @@ def preprocessing(img, sigma, kernel_size_blur, preprocessing_algorithm, kernel_
     elif preprocessing_algorithm == 5:
         img = frame_random(img, thickness=int((kernel_size-1)/2))
 
+    # apply gaussian blur
     if sigma != 0:
         img = gaussian_blur(img, kernel_size_blur, sigma)
+    # TODO: fix images when noise is applied
+
+    if preprocessing_algorithm == 0:
+        return img
+
+    img = img.astype(np.uint8)
 
     # return preprocessed image
     return img

@@ -3,7 +3,6 @@ import numpy as np
 
 # define sobel edge detection function
 def sobel_edge_detection(img, sigma=1, kernel_size=3, low_threshold=100, high_threshold=200, blur=True):
-    
     # apply gaussian blur
     if blur:
         img = cv2.GaussianBlur(img, (kernel_size, kernel_size), sigma)
