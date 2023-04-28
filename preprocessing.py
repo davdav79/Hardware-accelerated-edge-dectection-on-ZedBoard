@@ -233,13 +233,14 @@ def preprocessing(img, sigma, kernel_size_blur, preprocessing_algorithm, kernel_
     if preprocessing_algorithm == 1:
         img = frame_absolute(img=img, thickness=int((kernel_size-1)/2))
     elif preprocessing_algorithm == 2:
-        img = frame_mirror(img, thickness=int((kernel_size-1)/2))
-    elif preprocessing_algorithm == 3:
-        img = frame_mirror_opposite(img, thickness=int((kernel_size-1)/2))
-    elif preprocessing_algorithm == 4:
-        img = frame_extrapolate(img, thickness=int((kernel_size-1)/2))
-    elif preprocessing_algorithm == 5:
         img = frame_random(img, thickness=int((kernel_size-1)/2))
+    elif preprocessing_algorithm == 3:
+        img = frame_mirror(img, thickness=int((kernel_size-1)/2))
+    elif preprocessing_algorithm == 4:
+        img = frame_mirror_opposite(img, thickness=int((kernel_size-1)/2))
+    elif preprocessing_algorithm == 5:
+        img = frame_extrapolate(img, thickness=int((kernel_size-1)/2))
+    
 
     # apply gaussian blur
     if sigma != 0:

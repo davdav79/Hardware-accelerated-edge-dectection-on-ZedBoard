@@ -1,5 +1,4 @@
 # 4 interactive windows 1st: original, 2nd preprocessed, 3rd sobel, 4th canny, 5th XOR
-
 import cv2
 import numpy as np
 import preprocessing as pp
@@ -47,7 +46,7 @@ cv2.imshow('Originalbild', img)
 
 # window for preprocessed image next to Originalbild
 cv2.namedWindow('vorverarbeitetes Bild')
-#cv2.moveWindow('vorverarbeitetes Bild', img.shape[0], 0)
+cv2.moveWindow('vorverarbeitetes Bild', 100, 0)
 
 # define parameters
 sigma = 0
@@ -126,9 +125,13 @@ def preprocessing_algorithm_handler(x):
     elif preprocessing_algorithm == 1:
         print("Preprocessing Algorithm: absolute frame")
     elif preprocessing_algorithm == 2:
-        print("Preprocessing Algorithm: relative frame")
-
-       # TODO: print algorithm
+        print("Preprocessing Algorithm: random frame")
+    elif preprocessing_algorithm == 3:
+        print("Preprocessing Algorithm: mirrored frame")
+    elif preprocessing_algorithm == 4:
+        print("Preprocessing Algorithm: mirrored oppposite frame")
+    elif preprocessing_algorithm == 5:
+        print("Preprocessing Algorithm: extrapolated frame")
 
     # update sobel and canny
     global threshold_sobel
@@ -170,6 +173,7 @@ cv2.createTrackbar('kernel_size', 'vorverarbeitetes Bild', 0, 3, kernel_size_han
 
 # window for sobel image
 cv2.namedWindow('sobel Bild')
+cv2.moveWindow('sobel Bild', 200, 0)
 
 # define threshold
 threshold_sobel = 0
@@ -204,6 +208,7 @@ cv2.createTrackbar('threshold', 'sobel Bild', 0, 255, threshold_handler_sobel)
 
 # window for canny image
 cv2.namedWindow('canny Bild')
+cv2.moveWindow('canny Bild', 300, 0)
 
 # define thresholds
 threshold_canny = 0
@@ -238,6 +243,7 @@ cv2.createTrackbar('threshold', 'canny Bild', 0, 255, threshold_handler_canny)
 
 # window for XOR image
 cv2.namedWindow('XOR Bild')
+cv2.moveWindow('XOR Bild', 400, 0)
 
 XOR_img = np.bitwise_xor(sobel_img, canny_img)
 
@@ -251,10 +257,10 @@ def XOR_img_handler():
 
     # print error value
     error_value = np.sum(XOR_img)
-    print(error_value)
+    print("XOR Error Value: " + error_value)    
 
-    # small routine to minimize error value (about 5min runtime)
-    """
+# small routine to minimize error value (about 5min runtime)
+def minimize_error_value(x,y):
     global preprocessed_img
     global kernel_size
 
@@ -263,7 +269,7 @@ def XOR_img_handler():
     min_canny = 0
 
     for i in range(255):
-        print(i)
+        print(i + " / 255")
         for j in range(255):
             # calculate sobel and canny images
             sobel_test_img = sobel.sobel_edge_detection(img=preprocessed_img, kernel_size=kernel_size, high_threshold=i, blur=False)
@@ -277,13 +283,9 @@ def XOR_img_handler():
                 print("min_sobel: " + str(i))
                 print("min_canny: " + str(j))
                 print('---')
-    """
 
-# TODO: implement prints in console
-def minimize_error_value()
-
-cv2.Button('minimize error value', XOR_img_handler)
-cv2.Button("print error value", XOR_img_handler)
+# buttons in buttonbar (press ctrl+p to show buttonbar)
+cv2.createButton('minimize error value', minimize_error_value)
 
 # show image
 cv2.imshow('XOR Bild', XOR_img*255)
