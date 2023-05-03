@@ -77,9 +77,7 @@ def sigma_handler(x):
 
     # update sobel and canny
     global threshold_sobel
-    global threshold_canny
     threshold_handler_sobel(threshold_sobel)
-    threshold_handler_canny(threshold_canny)
 
 
 def kernel_size_blur_handler(x):
@@ -100,9 +98,7 @@ def kernel_size_blur_handler(x):
 
     # update sobel and canny
     global threshold_sobel
-    global threshold_canny
     threshold_handler_sobel(threshold_sobel)
-    threshold_handler_canny(threshold_canny)
 
 def preprocessing_algorithm_handler(x):
     # define global variables
@@ -135,9 +131,7 @@ def preprocessing_algorithm_handler(x):
 
     # update sobel and canny
     global threshold_sobel
-    global threshold_canny
     threshold_handler_sobel(threshold_sobel)
-    threshold_handler_canny(threshold_canny)
 
 def kernel_size_handler(x):
     # define global variables
@@ -157,9 +151,7 @@ def kernel_size_handler(x):
 
     # update sobel and canny
     global threshold_sobel
-    global threshold_canny
     threshold_handler_sobel(threshold_sobel)
-    threshold_handler_canny(threshold_canny)
 
 # add sliders for preprocessing
 cv2.createTrackbar('sigma', 'vorverarbeitetes Bild', 0, 10, sigma_handler)
@@ -196,12 +188,21 @@ def threshold_handler_sobel(x):
     # show image
     cv2.imshow('sobel Bild', sobel_img*255)
 
+    # update canny
+    global threshold_canny
+    threshold_handler_canny(cv2.getTrackbarPos('threshold', 'canny Bild'))
+
 
 # add slider for threshold
 cv2.createTrackbar('threshold', 'sobel Bild', 0, 255, threshold_handler_sobel)
 
 # canny image:
-# check opencv documentation for thresholds 
+# check opencv documentation for thresholds: 
+# everything below low_threshold is not an edge
+# everything above high_threshold is an edge
+# everything between low_threshold and high_threshold is an 
+# edge if it is connected to an edge above high_threshold
+
 # slider for low_threshold
 # slider for high_threshold
 # equalize thresholds
@@ -257,7 +258,7 @@ def XOR_img_handler():
 
     # print error value
     error_value = np.sum(XOR_img)
-    print("XOR Error Value: " + error_value)    
+    print("XOR Error Value: " + str(error_value))    
 
 # small routine to minimize error value (about 5min runtime)
 def minimize_error_value(x,y):

@@ -16,6 +16,7 @@ def frame_absolute(img, fill_value=0, thickness=1):
     # return frame
     return frame
 
+# TODO fix when blur is applied
 # define function for adding frame consisting of random values
 def frame_random(img, thickness=1):
     # get image shape
@@ -161,6 +162,7 @@ def frame_extrapolate(img, thickness=1):
     # return frame
     return frame
 
+# TODO: check if edges are mirrored and not copied
 # define function for adding frame by mirroring last line and averaging corners
 def frame_mirror(img, thickness=1):
     # get image shape
@@ -241,11 +243,9 @@ def preprocessing(img, sigma, kernel_size_blur, preprocessing_algorithm, kernel_
     elif preprocessing_algorithm == 5:
         img = frame_extrapolate(img, thickness=int((kernel_size-1)/2))
     
-
     # apply gaussian blur
     if sigma != 0:
         img = gaussian_blur(img, kernel_size_blur, sigma)
-    # TODO: fix images when noise is applied
 
     if preprocessing_algorithm == 0:
         return img
