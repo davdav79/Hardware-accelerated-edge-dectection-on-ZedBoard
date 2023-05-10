@@ -126,7 +126,6 @@ def sobel_canny_draw(x):
     sobel_canny = x
     if(x == 0):
         if(cv2.getWindowProperty('canny Bild', cv2.WND_PROP_VISIBLE) == -1):
-            print("destroy windosc")
             cv2.destroyWindow('canny Bild')
             cv2.destroyWindow('canny Bild no border')
         # window for sobel image
@@ -199,7 +198,8 @@ def kernel_size_blur_handler(x):
     kernel_size_blur = 2 * x + 3
     # apply preprocessing
     preprocessed_img = pp.preprocessing(img, sigma, kernel_size_blur, preprocessing_algorithm, kernel_size)
-    preprocessed_img_no_border = pp.preprocessing(img, sigma, kernel_size_blur, preprocessing_algorithm, kernel_size,borderType=cv2.BORDER_ISOLATED)
+    preprocessed_img_no_border = pp.preprocessing(img, sigma, kernel_size_blur, 0, kernel_size)
+    preprocessed_img_no_border = pp.preprocessing(img, 0, kernel_size_blur, preprocessing_algorithm, kernel_size)
     # show image
     cv2.imshow('vorverarbeitetes Bild', preprocessed_img)
     cv2.imshow('vorverarbeitetes Bild no border', preprocessed_img_no_border)
@@ -226,7 +226,8 @@ def preprocessing_algorithm_handler(x):
     preprocessing_algorithm = x
     # apply preprocessing
     preprocessed_img = pp.preprocessing(img, sigma, kernel_size_blur, preprocessing_algorithm, kernel_size)
-    preprocessed_img_no_border = pp.preprocessing(img, sigma, kernel_size_blur, preprocessing_algorithm, kernel_size,borderType=cv2.BORDER_ISOLATED)
+    preprocessed_img_no_border = pp.preprocessing(img, sigma, kernel_size_blur, 0, kernel_size)
+    preprocessed_img_no_border = pp.preprocessing(img, 0, kernel_size_blur, preprocessing_algorithm, kernel_size)
     # show image
     cv2.imshow('vorverarbeitetes Bild', preprocessed_img)
     cv2.imshow('vorverarbeitetes Bild no border', preprocessed_img_no_border)
@@ -302,7 +303,6 @@ cv2.createTrackbar('kernel_size', 'vorverarbeitetes Bild', 0, 3, kernel_size_han
 # window for XOR image
 cv2.namedWindow('XOR Bild')
 cv2.moveWindow('XOR Bild', 400, 0)
-
 XOR_img = np.bitwise_xor(sobel_img, sobel_img_no_border)
 
 # calculate XOR image with numpy
@@ -316,8 +316,6 @@ def XOR_img_handler():
 
     if(sobel_canny == 0):
         XOR_img = np.bitwise_xor(sobel_img, sobel_img_no_border)
-        print(sobel_img[0])
-        print(sobel_img_no_border[0])
         print(np.sum(XOR_img[0]))
         cv2.imshow('XOR Bild', XOR_img*255)
     else:
