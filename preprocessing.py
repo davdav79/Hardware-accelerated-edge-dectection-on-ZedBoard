@@ -222,18 +222,18 @@ def frame_mirror_opposite(img, thickness=1):
 
 
 # function for gaussian blur
-def gaussian_blur(img, kernel_size=3, sigma=1):
+def gaussian_blur(img, kernel_size=3, sigma=1,borderType=cv2.BORDER_DEFAULT):
     # apply gaussian blur
-    img_blur = cv2.GaussianBlur(img, (kernel_size, kernel_size), sigma)
+    img_blur = cv2.GaussianBlur(img, (kernel_size, kernel_size), sigma,borderType=borderType)
 
     # return blurred image
     return img_blur
 
 
-def preprocessing(img, sigma, kernel_size_blur, preprocessing_algorithm, kernel_size):
+def preprocessing(img, sigma, kernel_size_blur, preprocessing_algorithm, kernel_size,borderType=cv2.BORDER_DEFAULT):
     # apply preprocessing algorithm
     if preprocessing_algorithm == 1:
-        img = frame_absolute(img=img, thickness=int((kernel_size-1)/2))
+        img = frame_absolute(img=img, thickness=int((kernel_size-1)/2))     
     elif preprocessing_algorithm == 2:
         img = frame_random(img, thickness=int((kernel_size-1)/2))
     elif preprocessing_algorithm == 3:
@@ -242,10 +242,10 @@ def preprocessing(img, sigma, kernel_size_blur, preprocessing_algorithm, kernel_
         img = frame_mirror_opposite(img, thickness=int((kernel_size-1)/2))
     elif preprocessing_algorithm == 5:
         img = frame_extrapolate(img, thickness=int((kernel_size-1)/2))
-    
+
     # apply gaussian blur
     if sigma != 0:
-        img = gaussian_blur(img, kernel_size_blur, sigma)
+        img = gaussian_blur(img, kernel_size_blur, sigma,borderType)
 
     if preprocessing_algorithm == 0:
         return img
