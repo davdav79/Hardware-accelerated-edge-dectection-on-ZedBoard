@@ -129,6 +129,18 @@ def preprocessing_algorithm_handler(x):
     elif preprocessing_algorithm == 5:
         print("Preprocessing Algorithm: extrapolated frame")
 
+    # update ideal images
+    global ideal_image_sobel_original
+    global ideal_image_canny_original
+    global ideal_image_sobel
+    global ideal_image_canny
+    if preprocessing_algorithm != 0:
+        ideal_image_sobel = pp.frame_mirror(ideal_image_sobel_original, thickness=int((kernel_size-1)/2)).astype(np.uint8)
+        ideal_image_canny = pp.frame_mirror(ideal_image_canny_original, thickness=int((kernel_size-1)/2)).astype(np.uint8)
+    else:
+        ideal_image_sobel = ideal_image_sobel_original.copy()
+        ideal_image_canny = ideal_image_canny_original.copy()
+
     # update sobel and canny
     global threshold_sobel
     threshold_handler_sobel(threshold_sobel)
@@ -149,6 +161,18 @@ def kernel_size_handler(x):
     # show image
     cv2.imshow('vorverarbeitetes Bild', preprocessed_img)
 
+    # update ideal images
+    global ideal_image_sobel_original
+    global ideal_image_canny_original
+    global ideal_image_sobel
+    global ideal_image_canny
+    if preprocessing_algorithm != 0:
+        ideal_image_sobel = pp.frame_mirror(ideal_image_sobel_original, thickness=int((kernel_size-1)/2)).astype(np.uint8)
+        ideal_image_canny = pp.frame_mirror(ideal_image_canny_original, thickness=int((kernel_size-1)/2)).astype(np.uint8)
+    else:
+        ideal_image_sobel = ideal_image_sobel_original.copy()
+        ideal_image_canny = ideal_image_canny_original.copy()
+
     # update sobel and canny
     global threshold_sobel
     threshold_handler_sobel(threshold_sobel)
@@ -157,7 +181,7 @@ def kernel_size_handler(x):
 cv2.createTrackbar('sigma', 'vorverarbeitetes Bild', 0, 10, sigma_handler)
 cv2.createTrackbar('kernel_size_blur', 'vorverarbeitetes Bild', 0, 10, kernel_size_blur_handler)
 cv2.createTrackbar('preprocessing_algorithm', 'vorverarbeitetes Bild', 0, 5, preprocessing_algorithm_handler)
-cv2.createTrackbar('kernel_size', 'vorverarbeitetes Bild', 0, 3, kernel_size_handler)
+
 
 
 # sobel image:
@@ -182,7 +206,7 @@ def threshold_handler_sobel(x):
     global sobel_img
 
     # set threshold
-    threshold_sobel = x*kernel_size**2
+    threshold_sobel = x * 10
     # apply sobel
     sobel_img = sobel.sobel_edge_detection(img=preprocessed_img, kernel_size=kernel_size, high_threshold=threshold_sobel, blur=False)
     # show image
@@ -194,7 +218,7 @@ def threshold_handler_sobel(x):
 
 
 # add slider for threshold
-cv2.createTrackbar('threshold', 'sobel Bild', 0, 255, threshold_handler_sobel)
+cv2.createTrackbar('threshold', 'sobel Bild', 0, 100, threshold_handler_sobel)
 
 # canny image:
 # check opencv documentation for thresholds: 
@@ -226,7 +250,7 @@ def threshold_handler_canny(x):
     global canny_img
 
     # set thresholds
-    threshold_canny = x*kernel_size**2
+    threshold_canny = x * 10
     # apply canny
     canny_img = canny.canny_edge_detection(img=preprocessed_img, kernel_size=kernel_size, low_threshold=threshold_canny, high_threshold=threshold_canny, blur=False)
     # show image
@@ -236,10 +260,10 @@ def threshold_handler_canny(x):
     XOR_img_handler()
 
 # add slider for thresholds
-cv2.createTrackbar('threshold', 'canny Bild', 0, 255, threshold_handler_canny)
+cv2.createTrackbar('threshold', 'canny Bild', 0, 100, threshold_handler_canny)
 
 
-# XOR image:
+# XOR image for difference Sobel - Canny:
 # output for sum of pixels (error value)
 
 # window for XOR image
@@ -258,7 +282,106 @@ def XOR_img_handler():
 
     # print error value
     error_value = np.sum(XOR_img)
-    print("XOR Error Value: " + str(error_value))    
+    print("XOR Difference Value: " + str(error_value))
+
+    # update XOR error images
+    XOR_sobel_err_handler()
+    XOR_canny_err_handler()
+
+
+# XOR image for error Sobel - ideal:
+# output for sum of pixels (error value)
+
+# window for XOR image
+cv2.namedWindow('XOR Sobel Error Bild')
+cv2.moveWindow('XOR Sobel Error Bild', 500, 0)  
+
+ideal_image_sobel = cv2.imread("sample_images/ideal_edges_sobel.bmp")
+ideal_image_sobel = cv2.cvtColor(ideal_image_sobel, cv2.COLOR_BGR2GRAY)
+_, ideal_image_sobel_original = cv2.threshold(ideal_image_sobel, 0, 1, cv2.THRESH_BINARY)
+
+# make copy of ideal image
+ideal_image_sobel = ideal_image_sobel_original.copy()
+
+# calculate XOR image with numpy
+XOR_err_sobel = np.bitwise_xor(sobel_img, ideal_image_sobel)
+
+cv2.imshow('XOR Sobel Error Bild', XOR_err_sobel*255)
+
+np.set_printoptions(threshold=np.inf)
+# calculate XOR image with numpy
+def XOR_sobel_err_handler():
+    global XOR_err_sobel
+    global sobel_img
+    global ideal_image_sobel
+
+
+    print(ideal_image_sobel.shape)
+    print(sobel_img.shape)
+
+    XOR_err_sobel = np.bitwise_xor(sobel_img, ideal_image_sobel)
+    cv2.imshow('XOR Sobel Error Bild', XOR_err_sobel*255)
+
+    # calculate TP
+    TP = np.sum(np.bitwise_and(sobel_img, ideal_image_sobel))
+    # calculate FP
+    FP = np.sum(np.bitwise_and(sobel_img, np.bitwise_not(ideal_image_sobel)))
+    # calculate FN
+    FN = np.sum(np.bitwise_and(np.bitwise_not(sobel_img), ideal_image_sobel))
+
+    # print precision
+    print("Sobel Precision: " + str(TP/(TP + FP)))
+    # print recall
+    print("Sobel Recall: " + str(TP/(TP + FN)))
+    # print F1
+    print("Sobel F1: " + str(2/(1/(TP/(TP + FP)) + 1/(TP/(TP + FN)))))
+
+
+# XOR image for error Canny - ideal:
+# output for sum of pixels (error value)
+
+# window for XOR image
+cv2.namedWindow('XOR Canny Error Bild')
+cv2.moveWindow('XOR Canny Error Bild', 600, 0)  
+
+ideal_image_canny = cv2.imread("sample_images/ideal_edges_canny.bmp")
+ideal_image_canny = cv2.cvtColor(ideal_image_canny, cv2.COLOR_BGR2GRAY)
+_, ideal_image_canny_original = cv2.threshold(ideal_image_canny, 0, 1, cv2.THRESH_BINARY)
+
+# make copy of ideal image
+ideal_image_canny = ideal_image_canny_original.copy()
+
+# calculate XOR image with numpy
+XOR_err_canny = np.bitwise_xor(canny_img, ideal_image_canny)
+
+cv2.imshow('XOR Canny Error Bild', XOR_err_canny*255)
+
+# calculate XOR image with numpy
+def XOR_canny_err_handler():
+    global XOR_err_canny
+    global canny_img
+    global ideal_image_canny
+    XOR_err_canny = np.bitwise_xor(canny_img, ideal_image_canny)
+    cv2.imshow('XOR Canny Error Bild', XOR_err_canny*255)
+
+    # print error value
+    error_value = np.sum(XOR_err_canny)
+    print("XOR Canny Error Value: " + str(error_value))
+    
+    # calculate TP
+    TP = np.sum(np.bitwise_and(canny_img, ideal_image_canny))
+    # calculate FP
+    FP = np.sum(np.bitwise_and(canny_img, np.bitwise_not(ideal_image_canny)))
+    # calculate FN
+    FN = np.sum(np.bitwise_and(np.bitwise_not(canny_img), ideal_image_canny))
+
+    # print precision
+    print("Canny Precision: " + str(TP/(TP + FP)))
+    # print recall
+    print("Canny Recall: " + str(TP/(TP + FN)))
+    # print F1
+    print("Canny F1: " + str(2/(1/(TP/(TP + FP)) + 1/(TP/(TP + FN)))))
+
 
 # small routine to minimize error value (about 5min runtime)
 def minimize_error_value(x,y):
