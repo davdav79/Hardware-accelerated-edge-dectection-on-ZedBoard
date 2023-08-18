@@ -315,12 +315,12 @@ def XOR_sobel_err_handler():
     global sobel_img
     global ideal_image_sobel
 
-
-    print(ideal_image_sobel.shape)
-    print(sobel_img.shape)
-
     XOR_err_sobel = np.bitwise_xor(sobel_img, ideal_image_sobel)
     cv2.imshow('XOR Sobel Error Bild', XOR_err_sobel*255)
+
+    error_value = np.sum(XOR_err_sobel)
+
+    print("XOR Sobel Error Value: " + str(error_value))
 
     # calculate TP
     TP = np.sum(np.bitwise_and(sobel_img, ideal_image_sobel))
